@@ -2,16 +2,18 @@
   <v-container fluid class="constrained-width px-2 px-sm-4">
     <v-row class="mt-0 mt-sm-2">
       <v-col cols="12" md="6" class="pt-0">
-        <klippy-disconnected-card></klippy-disconnected-card>
+        <!-- <pre>{{ col1 }}</pre>
+        <pre>{{ col2 }}</pre> -->
+        <klippy-disconnected-card v-if="!klippyConnected"></klippy-disconnected-card>
         <status-card v-if="klippyConnected"></status-card>
-        <camera-card v-if="cameraEnabled"></camera-card>
-        <toolhead-card></toolhead-card>
-        <printer-limits-card></printer-limits-card>
+        <draggable v-model="col1" group="dashboard">
+          <component v-for="c in col1" :is="c" :key="c"></component>
+        </draggable>
       </v-col>
       <v-col cols="12" md="6" class="pt-0">
-        <tools-card></tools-card>
-        <console-card></console-card>
-        <temperature-graph-card></temperature-graph-card>
+        <draggable v-model="col2" group="dashboard">
+          <component v-for="c in col2" :is="c" :key="c"></component>
+        </draggable>
       </v-col>
     </v-row>
   </v-container>
@@ -19,6 +21,7 @@
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
+import draggable from 'vuedraggable'
 import StatusCard from '@/components/cards/dashboard/StatusCard.vue'
 import ToolsCard from '@/components/cards/dashboard/ToolsCard.vue'
 import ToolheadCard from '@/components/cards/dashboard/ToolheadCard.vue'
@@ -32,6 +35,7 @@ import UtilsMixin from '@/mixins/utils'
 
 @Component({
   components: {
+    draggable,
     StatusCard,
     ToolsCard,
     ToolheadCard,
@@ -44,8 +48,27 @@ import UtilsMixin from '@/mixins/utils'
   }
 })
 export default class Dashboard extends Mixins(UtilsMixin) {
+  aCol1 = ['camera-card', 'toolhead-card', 'printer-limits-card']
+  aCol2 = ['tools-card', 'console-card', 'temperature-graph-card']
+
   get cameraEnabled (): boolean {
     return this.$store.state.config.fileConfig.camera.enabled
+  }
+
+  get col1 (): string[] {
+    return this.aCol1
+  }
+
+  set col1 (val: string[]) {
+    this.aCol1 = val
+  }
+
+  get col2 (): string[] {
+    return this.aCol2
+  }
+
+  set col2 (val: string[]) {
+    this.aCol2 = val
   }
 }
 </script>
