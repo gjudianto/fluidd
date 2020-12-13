@@ -2,8 +2,8 @@
   <v-container fluid class="constrained-width px-2 px-sm-4">
     <v-row class="mt-0 mt-sm-2">
       <v-col cols="12" md="6" class="pt-0">
-        <!-- <pre>{{ col1 }}</pre>
-        <pre>{{ col2 }}</pre> -->
+        <pre>{{ col1 }}</pre>
+        <pre>{{ col2 }}</pre>
         <klippy-disconnected-card v-if="!klippyConnected"></klippy-disconnected-card>
         <status-card v-if="klippyConnected"></status-card>
         <draggable v-model="col1" group="dashboard">
@@ -56,7 +56,12 @@ export default class Dashboard extends Mixins(UtilsMixin) {
   }
 
   get col1 (): string[] {
-    return this.aCol1
+    return this.aCol1.filter((s) => {
+      if (s === 'camera-card' && !this.cameraEnabled) {
+        return false
+      }
+      return true
+    })
   }
 
   set col1 (val: string[]) {
