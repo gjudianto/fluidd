@@ -74,6 +74,8 @@ import {
   mdiUpdate,
   mdiChevronRight,
   mdiChevronLeft
+  mdiMenuDown,
+  mdiFilePlus
 } from '@mdi/js'
 
 /**
