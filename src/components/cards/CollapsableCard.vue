@@ -4,7 +4,26 @@
     color="tertiary"
     :rounded="rounded"
     :loading="isLoading">
-    <v-card-title class="card-title quaternary py-1">
+
+    <div v-if="hasTabbedTitleSlot" :class="{ 'draggable': isInLayout }">
+      <v-layout class="quaternary rounded-t" align-center>
+        <slot name="tabbed-title" v-bind:isInLayout="isInLayout"></slot>
+
+        <!-- Collapse Control -->
+        <div class="ml-2 mr-4 rounded-t">
+          <slot name="collapse-button" v-if="!isInLayout">
+            <btn-collapse v-model="isCollapsed"></btn-collapse>
+          </slot>
+          <v-icon left class="ml-2" v-if="isInLayout">$drag</v-icon>
+        </div>
+      </v-layout>
+    </div>
+
+    <v-card-title
+      v-if="!hasTabbedTitleSlot"
+      class="card-title quaternary py-1"
+      :class="{ 'draggable': isInLayout }"
+    >
       <slot name="title">
         <v-icon left>{{ icon }}</v-icon>
         <span class="font-weight-light">{{ title }}</span>
@@ -12,13 +31,13 @@
       <v-spacer />
 
       <!-- Menu Buttons, desktop + -->
-      <div class="d-none d-lg-flex">
+      <div class="d-none d-lg-flex" v-if="!isInLayout">
         <slot name="menu"></slot>
       </div>
 
       <!-- Menu, mobile / tablet -->
       <v-menu
-        v-if="hasMenuSlot && !hideMenu"
+        v-if="hasMenuSlot && !hideMenu && !isInLayout"
         left>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
@@ -36,9 +55,10 @@
       </v-menu>
 
       <!-- Collapse Control -->
-      <slot name="collapse-button">
+      <slot name="collapse-button" v-if="!isInLayout">
         <btn-collapse v-model="isCollapsed"></btn-collapse>
       </slot>
+      <v-icon left v-if="isInLayout">$drag</v-icon>
     </v-card-title>
     <v-divider></v-divider>
 
@@ -46,11 +66,11 @@
       <div
         @transitionend="transitionEvent"
         id="card-content"
-        v-if="!isCollapsed"
+        v-if="!isCollapsed && !isInLayout"
         :class="_contentClasses"
         :style="_contentStyles">
         <v-card-subtitle class="tertiary py-2" v-if="subTitle || hasSubTitleSlot">
-          <slot name="subTitle">
+          <slot name="sub-title">
             <span v-html="subTitle"></span>
           </slot>
         </v-card-subtitle>
@@ -65,7 +85,7 @@
       <div
         @transitionend="transitionEvent"
         id="card-content"
-        v-show="!isCollapsed"
+        v-show="!isCollapsed && !isInLayout"
         :class="_contentClasses"
         :style="_contentStyles">
         <v-card-subtitle class="tertiary py-2" v-if="subTitle || hasSubTitleSlot">
@@ -99,11 +119,14 @@ export default class ToolheadCard extends Vue {
   @Prop({ type: Boolean, default: true })
   lazy!: boolean // use v-show or v-if
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: false })
   icon!: string
 
   @Prop({ type: Boolean, default: false })
   loading!: boolean
+
+  @Prop({ type: Boolean, default: false })
+  draggable!: boolean
 
   @Prop({ type: Boolean, default: true })
   collapsable!: boolean
@@ -172,6 +195,10 @@ export default class ToolheadCard extends Vue {
     this.$store.dispatch('config/saveLocal', { [this.id]: val })
   }
 
+  get isInLayout (): boolean {
+    return (this.$store.state.config.layoutMode && this.draggable)
+  }
+
   get hasDefaultSlot () {
     return this.$slots.default || this.$scopedSlots.default
   }
@@ -185,11 +212,15 @@ export default class ToolheadCard extends Vue {
   }
 
   get hasSubTitleSlot () {
-    return this.$slots.subTitle || this.$scopedSlots.subTitle
+    return this.$slots['sub-title'] || this.$scopedSlots['sub-title']
   }
 
   get hasCollapseButtonSlot () {
     return this.$slots['collapse-button'] || this.$scopedSlots['collapse-button']
+  }
+
+  get hasTabbedTitleSlot () {
+    return this.$slots['tabbed-title'] || this.$scopedSlots['tabbed-title']
   }
 
   mounted () {
@@ -214,5 +245,9 @@ export default class ToolheadCard extends Vue {
 <style lang="scss" scoped>
   .card-title {
     min-height: 48px;
+  }
+
+  .draggable {
+    cursor: pointer;
   }
 </style>

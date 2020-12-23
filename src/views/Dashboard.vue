@@ -2,17 +2,32 @@
   <v-container fluid class="constrained-width px-2 px-sm-4">
     <v-row class="mt-0 mt-sm-2">
       <v-col cols="12" md="6" class="pt-0">
-        <pre>{{ col1 }}</pre>
-        <pre>{{ col2 }}</pre>
+        <!-- <pre>{{ col1 }}</pre>
+        <pre>{{ col2 }}</pre> -->
         <klippy-disconnected-card v-if="!klippyConnected"></klippy-disconnected-card>
         <status-card v-if="klippyConnected"></status-card>
-        <draggable v-model="col1" group="dashboard">
-          <component v-for="c in col1" :is="c" :key="c"></component>
+        <draggable
+          class="list-group"
+          v-model="col1"
+          v-bind="dragOptions"
+          @start="drag = true"
+          @end="drag = false"
+        >
+          <transition-group type="transition" :name="!drag ? 'flip-list' : null">
+            <component v-for="c in col1" :is="c.name" :key="c.name"></component>
+          </transition-group>
         </draggable>
       </v-col>
       <v-col cols="12" md="6" class="pt-0">
-        <draggable v-model="col2" group="dashboard">
-          <component v-for="c in col2" :is="c" :key="c"></component>
+        <draggable
+          class="list-group"
+          v-model="col2"
+          v-bind="dragOptions"
+          @start="drag = true"
+          @end="drag = false">
+          <transition-group type="transition" :name="!drag ? 'flip-list' : null">
+            <component v-for="c in col2" :is="c.name" :key="c.name"></component>
+          </transition-group>
         </draggable>
       </v-col>
     </v-row>
@@ -48,32 +63,81 @@ import UtilsMixin from '@/mixins/utils'
   }
 })
 export default class Dashboard extends Mixins(UtilsMixin) {
-  aCol1 = ['camera-card', 'toolhead-card', 'printer-limits-card']
-  aCol2 = ['tools-card', 'console-card', 'temperature-graph-card']
+  aCol1 = [
+    { name: 'camera-card' },
+    { name: 'toolhead-card' },
+    { name: 'printer-limits-card' }
+  ]
+
+  aCol2 = [
+    { name: 'tools-card' },
+    { name: 'console-card' },
+    { name: 'temperature-graph-card' }
+  ]
+
+  drag = false
 
   get cameraEnabled (): boolean {
     return this.$store.state.config.fileConfig.camera.enabled
   }
 
-  get col1 (): string[] {
+  get col1 (): Array<{ name: string }> {
     return this.aCol1.filter((s) => {
-      if (s === 'camera-card' && !this.cameraEnabled) {
+      if (s.name === 'camera-card' && !this.cameraEnabled) {
         return false
       }
       return true
     })
   }
 
-  set col1 (val: string[]) {
+  set col1 (val: Array<{ name: string }>) {
     this.aCol1 = val
   }
 
-  get col2 (): string[] {
+  get col2 (): Array<{ name: string }> {
     return this.aCol2
   }
 
-  set col2 (val: string[]) {
+  set col2 (val: Array<{ name: string }>) {
     this.aCol2 = val
+  }
+
+  get isInLayout (): boolean {
+    return (this.$store.state.config.layoutMode)
+  }
+
+  get dragOptions () {
+    return {
+      animation: 200,
+      group: 'dashboard',
+      disabled: !this.isInLayout,
+      ghostClass: 'ghost'
+    }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .flip-list-move {
+    transition: transform 0.5s;
+  }
+
+  .no-move {
+    transition: transform 0s;
+  }
+
+  .ghost {
+    opacity: 0.5;
+    background: #ccc;
+  }
+
+  .list-group {
+    min-height: 20px;
+
+    span {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+</style>

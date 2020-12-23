@@ -176,6 +176,10 @@ export const mutations: MutationTree<ConfigState> = {
    */
   removePreset (state, payload) {
     state.fileConfig.dashboard.tempPresets.splice(payload, 1)
+  },
+
+  setLayoutMode (state, payload) {
+    state.layoutMode = payload
   }
 
 }

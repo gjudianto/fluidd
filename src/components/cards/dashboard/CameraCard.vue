@@ -3,7 +3,8 @@
     title="Camera"
     icon="$camera"
     :lazy="false"
-    :collapsed="true">
+    :collapsed="true"
+    :draggable="true">
 
     <img :src="cameraUrl" class="webcam" :style="cameraTransforms" v-if="streamType === 'mjpgstreamer'" />
     <video :src="cameraUrl" autoplay class="webcam" :style="cameraTransforms" v-if="streamType === 'ipcamera'" />

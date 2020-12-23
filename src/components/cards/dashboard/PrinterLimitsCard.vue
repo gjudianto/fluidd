@@ -2,7 +2,8 @@
   <collapsable-card
     title="Printer Limits"
     icon="$limits"
-    :collapsed="true">
+    :collapsed="true"
+    :draggable="true">
     <printer-limits-widget></printer-limits-widget>
   </collapsable-card>
 </template>

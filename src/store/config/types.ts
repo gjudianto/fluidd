@@ -3,6 +3,7 @@ export interface ConfigState {
   apiUrl: string;
   socketUrl: string;
   unsavedChanges: boolean;
+  layoutMode: boolean;
   localConfig: LocalConfig;
   instances: InstanceConfig[];
   fileConfig: FileConfig;

@@ -2,7 +2,8 @@
   <collapsable-card
     :hide-menu="(printerPrinting)"
     title="Tool"
-    icon="$printer3dNozzle">
+    icon="$printer3dNozzle"
+    :draggable="true">
 
     <template v-slot:title>
       <v-icon left>$printer3dNozzle</v-icon>

@@ -1,7 +1,8 @@
 <template>
   <collapsable-card
     title="Targets"
-    icon="$fire">
+    icon="$fire"
+    :draggable="true">
     <temperature-targets-widget></temperature-targets-widget>
   </collapsable-card>
 </template>

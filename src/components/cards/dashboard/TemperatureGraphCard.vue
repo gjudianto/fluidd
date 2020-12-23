@@ -2,7 +2,8 @@
   <collapsable-card
     :loading="!chartReady"
     title="Temperature"
-    icon="$chart">
+    icon="$chart"
+    :draggable="true">
 
     <v-card-text class="chart-container">
       <temperature-chart-widget @hook:mounted="chartMounted()" v-if="chartReady" :chart-data="chartData" :styles="chartStyles"></temperature-chart-widget>

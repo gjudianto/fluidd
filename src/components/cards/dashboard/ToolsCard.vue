@@ -1,73 +1,64 @@
 <template>
-  <v-card
-    class="mb-2 mb-sm-4"
-    color="tertiary">
+  <collapsable-card
+    cardKey="Tools"
+    :draggable="true">
 
-    <v-card-title
-      class="card-title quaternary py-1"
-      v-if="!showTabs">
+    <template v-slot:title v-if="!showTabs">
       <v-icon left>$fire</v-icon>
       <span class="font-weight-light">Targets</span>
-      <v-spacer />
+    </template>
 
-      <btn-collapse v-model="isCollapsed"></btn-collapse>
+    <template v-slot:tabbed-title="props" v-if="showTabs">
+      <v-tabs
+        v-if="showTabs"
+        v-model="tab"
+        fixed-tabs
+        background-color="quaternary"
+        class="rounded-t"
+      >
+        <v-tab :key="'targets'" :disabled="props.isInLayout">
+          <v-icon left>$fire</v-icon>
+          Targets
+        </v-tab>
+        <v-tab :key="'macros'" v-if="hasMacros" :disabled="props.isInLayout">
+          <v-icon left>$fileCode</v-icon>
+          Macros
+        </v-tab>
+        <v-tab :key="'power'" v-if="devicePowerPluginEnabled" :disabled="props.isInLayout">
+          <v-icon left>$power</v-icon>
+          Power
+        </v-tab>
+        <v-tab :key="'jobs'" v-if="klippyConnected && jobsInDash" :disabled="props.isInLayout">
+          <v-icon left>$files</v-icon>
+          Jobs
+        </v-tab>
+      </v-tabs>
+    </template>
 
-    </v-card-title>
-    <v-tabs
-      v-if="showTabs"
-      v-model="tab"
-      fixed-tabs
-      background-color="quaternary"
-    >
-      <v-tab :key="'targets'">
-        <v-icon left>$fire</v-icon>
-        Targets
-      </v-tab>
-      <v-tab :key="'macros'" v-if="hasMacros">
-        <v-icon left>$fileCode</v-icon>
-        Macros
-      </v-tab>
-      <v-tab :key="'power'" v-if="devicePowerPluginEnabled">
-        <v-icon left>$power</v-icon>
-        Power
-      </v-tab>
-      <v-tab :key="'jobs'" v-if="klippyConnected && jobsInDash">
-        <v-icon left>$files</v-icon>
-        Jobs
-      </v-tab>
+    <v-tabs-items v-model="tab" class="mb-auto rounded-b">
+      <v-tab-item :key="'targets'" class="tertiary rounded-b">
+        <temperature-targets-widget></temperature-targets-widget>
+      </v-tab-item>
+      <v-tab-item :key="'macros'" class="tertiary rounded-b" v-if="hasMacros">
+        <macros-widget></macros-widget>
+      </v-tab-item>
+      <v-tab-item :key="'power'" class="tertiary rounded-b" v-if="devicePowerPluginEnabled">
+        <power-control-widget></power-control-widget>
+      </v-tab-item>
+      <v-tab-item :key="'jobs'" class="tertiary rounded-b max-height" v-if="klippyConnected && jobsInDash">
+        <file-system-card
+          root="gcodes"
+          accept=".gcode,.ufp"
+          dense
+          :height="400"
+          :show-title="false"
+          :show-meta-data="false"
+          :upload-and-print="true"
+        ></file-system-card>
+      </v-tab-item>
+    </v-tabs-items>
 
-      <!-- Collapse Control -->
-      <btn-collapse class="align-self-center ml-2 mr-4" v-model="isCollapsed"></btn-collapse>
-    </v-tabs>
-    <v-divider></v-divider>
-
-    <v-expand-transition>
-      <div v-show="!isCollapsed">
-        <v-tabs-items v-model="tab" class="mb-auto rounded">
-          <v-tab-item :key="'targets'" class="tertiary rounded">
-            <temperature-targets-widget></temperature-targets-widget>
-          </v-tab-item>
-          <v-tab-item :key="'macros'" class="tertiary rounded" v-if="hasMacros">
-            <macros-widget></macros-widget>
-          </v-tab-item>
-          <v-tab-item :key="'power'" class="tertiary rounded" v-if="devicePowerPluginEnabled">
-            <power-control-widget></power-control-widget>
-          </v-tab-item>
-          <v-tab-item :key="'jobs'" class="tertiary rounded max-height" v-if="klippyConnected && jobsInDash">
-            <file-system-card
-              root="gcodes"
-              accept=".gcode,.ufp"
-              dense
-              :height="400"
-              :show-title="false"
-              :show-meta-data="false"
-              :upload-and-print="true"
-            ></file-system-card>
-          </v-tab-item>
-        </v-tabs-items>
-      </div>
-    </v-expand-transition>
-  </v-card>
+  </collapsable-card>
 </template>
 
 <script lang="ts">
@@ -106,16 +97,8 @@ export default class ToolsCard extends Mixins(UtilsMixin) {
     return (this.$store.getters['socket/getVisibleMacros'].length)
   }
 
-  get isCollapsed (): boolean {
-    const collapsed = (this.$store.state.config.localConfig.Tools === undefined)
-      ? false
-      : this.$store.state.config.localConfig.Tools
-
-    return collapsed
-  }
-
-  set isCollapsed (val: boolean) {
-    this.$store.dispatch('config/saveLocal', { Tools: val })
+  get isInLayout (): boolean {
+    return (this.$store.state.config.layoutMode)
   }
 
   get devicePowerPluginEnabled () {
@@ -129,14 +112,6 @@ export default class ToolsCard extends Mixins(UtilsMixin) {
 </script>
 
 <style lang="scss" scoped>
-  .v-tabs-items {
-    > .v-window__container {
-      > .v-window-item.max-height {
-        // height: 400px;
-      }
-    }
-  }
-
   ::v-deep .v-tabs > .v-slide-group--is-overflowing.v-tabs-bar--is-mobile > .v-slide-group__prev,
   ::v-deep .v-tabs > .v-slide-group--is-overflowing.v-tabs-bar--is-mobile > .v-slide-group__next {
     display: none !important;

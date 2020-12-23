@@ -5,7 +5,8 @@
     cardClasses="mb-2 mb-sm-4 d-flex flex-column"
     contentClasses="flex-grow-1 flow-shrink-0"
     :height="450"
-    :collapsed="true">
+    :collapsed="true"
+    :draggable="true">
 
     <console-widget
       :items="items"

@@ -5,7 +5,6 @@
 - z-offset configuration + sheet config
 - upload progress indicator
 - add ability to delete bed mesh profile
-- 
 - update panel collapse so these are remembered per instance
 - stage 1 themes (pick a specific theme (red, green etc..)
 - ensure users can still download log files when the printer is not in an error state
@@ -16,6 +15,7 @@
 - PID calibrate option via dialog maybe?
 - Drag and Drop move.
 - Add a way to specify a value for sliders
+- show known meta data on print dialog?
 
 - self update
 - draggable cards (vue-draggable)

@@ -73,9 +73,8 @@ import {
   mdiRestartAlert,
   mdiUpdate,
   mdiChevronRight,
-  mdiChevronLeft
-  mdiMenuDown,
-  mdiFilePlus
+  mdiChevronLeft,
+  mdiDrag
 } from '@mdi/js'
 
 /**
@@ -102,6 +101,7 @@ export const Icons = Object.freeze({
   send: mdiSend,
   menu: mdiDotsVertical,
   menuAlt: mdiMenuDown,
+  drag: mdiDrag,
   chart: mdiChartTimelineVariant,
   power: mdiPower,
   powerCycle: mdiPowerCycle,

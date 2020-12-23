@@ -11,6 +11,7 @@ export const defaultState = (): ConfigState => {
     apiUrl: '',
     socketUrl: '',
     unsavedChanges: false,
+    layoutMode: false,
     localConfig: {},
     instances: [],
     fileConfig: {
