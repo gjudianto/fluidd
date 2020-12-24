@@ -1,7 +1,10 @@
 <template>
   <collapsable-card
-    cardKey="Tools"
-    :draggable="true">
+    title="Tools"
+    :draggable="true"
+    :inLayout="inLayout"
+    :enabled="enabled"
+    @enabled="$emit('enabled', $event)">
 
     <template v-slot:title v-if="!showTabs">
       <v-icon left>$fire</v-icon>
@@ -16,19 +19,19 @@
         background-color="quaternary"
         class="rounded-t"
       >
-        <v-tab :key="'targets'" :disabled="props.isInLayout">
+        <v-tab :key="'targets'" :disabled="props.inLayout">
           <v-icon left>$fire</v-icon>
           Targets
         </v-tab>
-        <v-tab :key="'macros'" v-if="hasMacros" :disabled="props.isInLayout">
+        <v-tab :key="'macros'" v-if="hasMacros" :disabled="props.inLayout">
           <v-icon left>$fileCode</v-icon>
           Macros
         </v-tab>
-        <v-tab :key="'power'" v-if="devicePowerPluginEnabled" :disabled="props.isInLayout">
+        <v-tab :key="'power'" v-if="devicePowerPluginEnabled" :disabled="props.inLayout">
           <v-icon left>$power</v-icon>
           Power
         </v-tab>
-        <v-tab :key="'jobs'" v-if="klippyConnected && jobsInDash" :disabled="props.isInLayout">
+        <v-tab :key="'jobs'" v-if="klippyConnected && jobsInDash" :disabled="props.inLayout">
           <v-icon left>$files</v-icon>
           Jobs
         </v-tab>
@@ -62,7 +65,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import UtilsMixin from '@/mixins/utils'
 import FileSystemCard from '@/components/cards/FileSystemCard.vue'
 import PowerControlWidget from '@/components/widgets/PowerControlWidget.vue'
@@ -78,6 +81,9 @@ import TemperatureTargetsWidget from '@/components/widgets/TemperatureTargetsWid
   }
 })
 export default class ToolsCard extends Mixins(UtilsMixin) {
+  @Prop({ type: Boolean, default: true })
+  enabled!: boolean
+
   tab = 0
   // get activeTab () {
   //   return (this.$store.state.config.localConfig.dashTab === undefined)
@@ -97,16 +103,16 @@ export default class ToolsCard extends Mixins(UtilsMixin) {
     return (this.$store.getters['socket/getVisibleMacros'].length)
   }
 
-  get isInLayout (): boolean {
-    return (this.$store.state.config.layoutMode)
-  }
-
   get devicePowerPluginEnabled () {
     return (this.$store.state.socket.plugins.includes('power'))
   }
 
   get jobsInDash () {
     return this.$store.state.config.fileConfig.general.jobsInDash
+  }
+
+  get inLayout (): boolean {
+    return (this.$store.state.config.layoutMode)
   }
 }
 </script>

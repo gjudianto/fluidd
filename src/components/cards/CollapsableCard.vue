@@ -7,15 +7,21 @@
 
     <div v-if="hasTabbedTitleSlot" :class="{ 'draggable': isInLayout }">
       <v-layout class="quaternary rounded-t" align-center>
-        <slot name="tabbed-title" v-bind:isInLayout="isInLayout"></slot>
+        <slot name="tabbed-title" v-bind:inLayout="isInLayout"></slot>
 
         <!-- Collapse Control -->
-        <div class="ml-2 mr-4 rounded-t">
-          <slot name="collapse-button" v-if="!isInLayout">
-            <btn-collapse v-model="isCollapsed"></btn-collapse>
-          </slot>
-          <v-icon left class="ml-2" v-if="isInLayout">$drag</v-icon>
-        </div>
+        <btn-collapse v-if="!isInLayout" v-model="isCollapsed"></btn-collapse>
+
+        <!-- Drag Control -->
+        <v-checkbox
+          v-if="isInLayout"
+          :input-value="enabled"
+          @change="$emit('enabled', $event)"
+          hide-details
+          class="mt-0 pt-0">
+        </v-checkbox>
+        <v-icon left class="mr-5" v-if="isInLayout">$drag</v-icon>
+
       </v-layout>
     </div>
 
@@ -58,6 +64,9 @@
       <slot name="collapse-button" v-if="!isInLayout">
         <btn-collapse v-model="isCollapsed"></btn-collapse>
       </slot>
+
+      <!-- Drag Control -->
+      <v-checkbox v-if="isInLayout" :input-value="enabled" @change="$emit('enabled', $event)" hide-details class="mt-0 pt-0"></v-checkbox>
       <v-icon left v-if="isInLayout">$drag</v-icon>
     </v-card-title>
     <v-divider></v-divider>
@@ -107,7 +116,7 @@ import { Component, Vue, Prop } from 'vue-property-decorator'
 
 @Component({})
 export default class ToolheadCard extends Vue {
-  @Prop({ type: String })
+  @Prop({ type: String, required: true })
   title!: string
 
   @Prop({ type: String, required: false })
@@ -127,6 +136,12 @@ export default class ToolheadCard extends Vue {
 
   @Prop({ type: Boolean, default: false })
   draggable!: boolean
+
+  @Prop({ type: Boolean, default: false })
+  inLayout!: boolean
+
+  @Prop({ type: Boolean, default: true })
+  enabled!: boolean
 
   @Prop({ type: Boolean, default: true })
   collapsable!: boolean
@@ -176,7 +191,8 @@ export default class ToolheadCard extends Vue {
   }
 
   get id (): string {
-    return (this.cardKey) ? this.cardKey : this.title
+    if (this.cardKey) return this.cardKey
+    return this.title.replace(' ', '')
   }
 
   get isLoading (): boolean | string {
@@ -184,19 +200,19 @@ export default class ToolheadCard extends Vue {
   }
 
   get isCollapsed (): boolean {
-    const collapsed = (this.$store.state.config.localConfig[this.id] === undefined)
+    const collapsed = (this.$store.state.config.cardState[this.id] === undefined)
       ? this.collapsed
-      : this.$store.state.config.localConfig[this.id]
+      : this.$store.state.config.cardState[this.id]
 
     return collapsed
   }
 
   set isCollapsed (val: boolean) {
-    this.$store.dispatch('config/saveLocal', { [this.id]: val })
+    this.$store.dispatch('config/saveCardState', { [this.id]: val })
   }
 
   get isInLayout (): boolean {
-    return (this.$store.state.config.layoutMode && this.draggable)
+    return (this.inLayout && this.draggable)
   }
 
   get hasDefaultSlot () {

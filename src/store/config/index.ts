@@ -12,7 +12,19 @@ export const defaultState = (): ConfigState => {
     socketUrl: '',
     unsavedChanges: false,
     layoutMode: false,
-    localConfig: {},
+    cardState: {},
+    cardLayout: {
+      dashboard1: [
+        { name: 'toolhead-card', enabled: true },
+        { name: 'camera-card', enabled: true },
+        { name: 'printer-limits-card', enabled: true }
+      ],
+      dashboard2: [
+        { name: 'tools-card', enabled: true },
+        { name: 'console-card', enabled: true },
+        { name: 'temperature-graph-card', enabled: true }
+      ]
+    },
     instances: [],
     fileConfig: {
       general: {

@@ -2,8 +2,6 @@
   <v-container fluid class="constrained-width px-2 px-sm-4">
     <v-row class="mt-0 mt-sm-2">
       <v-col cols="12" md="6" class="pt-0">
-        <!-- <pre>{{ col1 }}</pre>
-        <pre>{{ col2 }}</pre> -->
         <klippy-disconnected-card v-if="!klippyConnected"></klippy-disconnected-card>
         <status-card v-if="klippyConnected"></status-card>
         <draggable
@@ -14,7 +12,7 @@
           @end="drag = false"
         >
           <transition-group type="transition" :name="!drag ? 'flip-list' : null">
-            <component v-for="c in col1" :is="c.name" :key="c.name"></component>
+            <component v-for="c in col1" :is="c.name" :key="c.name" :enabled="c.enabled" @enabled="onEnabled($event, c, 'dashboard1')"></component>
           </transition-group>
         </draggable>
       </v-col>
@@ -24,9 +22,10 @@
           v-model="col2"
           v-bind="dragOptions"
           @start="drag = true"
-          @end="drag = false">
+          @end="drag = false"
+        >
           <transition-group type="transition" :name="!drag ? 'flip-list' : null">
-            <component v-for="c in col2" :is="c.name" :key="c.name"></component>
+            <component v-for="c in col2" :is="c.name" :key="c.name" :enabled="c.enabled" @enabled="onEnabled($event, c, 'dashboard2')"></component>
           </transition-group>
         </draggable>
       </v-col>
@@ -47,6 +46,8 @@ import ConsoleCard from '@/components/cards/dashboard/ConsoleCard.vue'
 import PrinterLimitsCard from '@/components/cards/dashboard/PrinterLimitsCard.vue'
 import KlippyDisconnectedCard from '@/components/cards/KlippyDisconnectedCard.vue'
 import UtilsMixin from '@/mixins/utils'
+import { CardConfig } from '@/store/config/types'
+import { cloneDeep } from 'lodash-es'
 
 @Component({
   components: {
@@ -63,46 +64,29 @@ import UtilsMixin from '@/mixins/utils'
   }
 })
 export default class Dashboard extends Mixins(UtilsMixin) {
-  aCol1 = [
-    { name: 'camera-card' },
-    { name: 'toolhead-card' },
-    { name: 'printer-limits-card' }
-  ]
-
-  aCol2 = [
-    { name: 'tools-card' },
-    { name: 'console-card' },
-    { name: 'temperature-graph-card' }
-  ]
-
   drag = false
 
   get cameraEnabled (): boolean {
     return this.$store.state.config.fileConfig.camera.enabled
   }
 
-  get col1 (): Array<{ name: string }> {
-    return this.aCol1.filter((s) => {
-      if (s.name === 'camera-card' && !this.cameraEnabled) {
-        return false
-      }
-      return true
-    })
+  get col1 (): CardConfig[] {
+    return this.filterComponents(this.$store.getters['config/getCards']('dashboard1'))
   }
 
-  set col1 (val: Array<{ name: string }>) {
-    this.aCol1 = val
+  set col1 (cards: CardConfig[]) {
+    this.$store.dispatch('config/saveCardConfig', { group: 'dashboard1', cards })
   }
 
-  get col2 (): Array<{ name: string }> {
-    return this.aCol2
+  get col2 (): CardConfig[] {
+    return this.filterComponents(this.$store.getters['config/getCards']('dashboard2'))
   }
 
-  set col2 (val: Array<{ name: string }>) {
-    this.aCol2 = val
+  set col2 (cards: CardConfig[]) {
+    this.$store.dispatch('config/saveCardConfig', { group: 'dashboard2', cards })
   }
 
-  get isInLayout (): boolean {
+  get inLayout (): boolean {
     return (this.$store.state.config.layoutMode)
   }
 
@@ -110,8 +94,28 @@ export default class Dashboard extends Mixins(UtilsMixin) {
     return {
       animation: 200,
       group: 'dashboard',
-      disabled: !this.isInLayout,
+      disabled: !this.inLayout,
       ghostClass: 'ghost'
+    }
+  }
+
+  filterComponents (componentArray: CardConfig[]) {
+    return componentArray.filter((s) => {
+      // Take care of special cases.
+      if (this.inLayout) return true
+      if (s.name === 'camera-card' && !this.cameraEnabled) return false
+
+      // Otherwise return whatever the enabled state is.
+      return s.enabled
+    })
+  }
+
+  onEnabled (enabled: boolean, c: CardConfig, group: string) {
+    const cards = cloneDeep(this.$store.getters['config/getCards'](group))
+    const card = cards.find((card: CardConfig) => c.name === card.name)
+    if (card) {
+      card.enabled = enabled
+      this.$store.dispatch('config/saveCardConfig', { group, cards })
     }
   }
 }

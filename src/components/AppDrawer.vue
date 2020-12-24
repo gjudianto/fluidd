@@ -99,7 +99,7 @@ export default class AppDrawer extends Mixins(UtilsMixin) {
 
   set layoutMode (val: boolean) {
     this.$store.commit('config/setLayoutMode', val)
-    // this.close()
+    this.close()
   }
 
   get instanceName () {
